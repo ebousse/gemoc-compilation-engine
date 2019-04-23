@@ -13,3 +13,4 @@ Export-Package: gemoctraceability,
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.emf.ecore;visibility:=reexport
 Bundle-ActivationPolicy: lazy
+Automatic-Module-Name: org.gemoc.execution.traceability.model

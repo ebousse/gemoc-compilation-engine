@@ -11,7 +11,7 @@ class TargetExecutionPlatform implements IExecutionPlatform {
 	val Collection<IEngineAddon> addons = new ArrayList<IEngineAddon>
 
 	override getEngineAddons() {
-		synchronized (_addonLock) {
+		synchronized (addonLock) {
 			return Collections.unmodifiableCollection(new ArrayList<IEngineAddon>(addons));
 		}
 	}
@@ -20,16 +20,16 @@ class TargetExecutionPlatform implements IExecutionPlatform {
 		addons.clear();
 	}
 
-	private Object _addonLock = new Object();
+	val Object addonLock = new Object();
 
 	override addEngineAddon(IEngineAddon addon) {
-		synchronized (_addonLock) {
+		synchronized (addonLock) {
 			addons.add(addon);
 		}
 	}
 
 	override removeEngineAddon(IEngineAddon addon) {
-		synchronized (_addonLock) {
+		synchronized (addonLock) {
 			addons.remove(addon);
 		}
 	}

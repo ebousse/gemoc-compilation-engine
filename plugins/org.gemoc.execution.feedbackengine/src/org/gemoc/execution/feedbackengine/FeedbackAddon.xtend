@@ -6,17 +6,17 @@ import org.eclipse.gemoc.xdsmlframework.api.engine_addon.IEngineAddon
 
 class FeedbackAddon implements IEngineAddon {
 
-	private val FeedbackManager feedbackInterpreter
+	val FeedbackManager feedbackInterpreter
 
 	new(FeedbackManager feedbackInterpreter) {
 		this.feedbackInterpreter = feedbackInterpreter
 	}
-
-	override aboutToExecuteStep(IExecutionEngine engine, Step<?> step) {
+	
+	override aboutToExecuteStep(IExecutionEngine<?> engine, Step<?> step) {
 		feedbackInterpreter.processTargetStepStart(step)
 	}
 
-	override stepExecuted(IExecutionEngine engine, Step<?> step) {
+	override stepExecuted(IExecutionEngine<?> engine, Step<?> step) {
 		feedbackInterpreter.processTargetStepEnd(step)
 	}
 

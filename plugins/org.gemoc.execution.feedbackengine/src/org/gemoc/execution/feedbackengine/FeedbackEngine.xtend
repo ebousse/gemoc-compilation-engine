@@ -15,11 +15,13 @@ import org.eclipse.emf.ecore.resource.ResourceSet
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
 import org.eclipse.emf.edit.command.AddCommand
 import org.eclipse.emf.transaction.util.TransactionUtil
+import org.eclipse.gemoc.execution.sequential.javaengine.SequentialModelExecutionContext
 import org.eclipse.gemoc.executionframework.engine.core.AbstractExecutionEngine
 import org.eclipse.gemoc.executionframework.engine.core.AbstractSequentialExecutionEngine
 import org.eclipse.gemoc.xdsmlframework.api.core.IExecutionContext
+import org.eclipse.gemoc.xdsmlframework.api.core.IRunConfiguration
 
-class FeedbackEngine extends AbstractSequentialExecutionEngine {
+class FeedbackEngine extends AbstractSequentialExecutionEngine<SequentialModelExecutionContext<IRunConfiguration>, IRunConfiguration> {
 
 	public static val String annotationCompilerKey = "compiler"
 	public static val String annotationFeedbackKey = "feedback"
@@ -31,17 +33,20 @@ class FeedbackEngine extends AbstractSequentialExecutionEngine {
 
 	var boolean feedback = true
 
-	public def void feedbackStartStep(EObject caller, String className, String operationName) {
+	def void feedbackStartStep(EObject caller, String className, String operationName) {
 		beforeExecutionStep(caller, className, operationName);
 	}
 
-	public def void feedbackEndStep() {
+	def void feedbackEndStep() {
 		afterExecutionStep
 	}
 
-	override protected prepareEntryPoint(IExecutionContext executionContext) {
+	override protected prepareEntryPoint(SequentialModelExecutionContext<IRunConfiguration> executionContext) {
 
 		// Reading melange model to find compiler and feedback identifiers
+//		val Dsl language = getMelangeLanguage(executionContext)
+//		val String compilerID = language.entries.findFirst[key.equals(annotationCompilerKey)].value
+//		val String feedbackID = language.entries.findFirst[key.equals(annotationFeedbackKey)].value
 		val Language language = getMelangeLanguage(executionContext)
 		val String compilerID = language.annotations.findFirst[key.equals(annotationCompilerKey)].value
 		val String feedbackID = language.annotations.findFirst[key.equals(annotationFeedbackKey)].value
@@ -146,11 +151,12 @@ class FeedbackEngine extends AbstractSequentialExecutionEngine {
 				}
 			}
 		}
+
 	}
 
 	override protected executeEntryPoint() {
 		targetEngine.startSynchronous();
-		if (targetEngine.error != null)
+		if (targetEngine.error !== null)
 			throw targetEngine.error
 	}
 
@@ -158,11 +164,11 @@ class FeedbackEngine extends AbstractSequentialExecutionEngine {
 		// Nothing to do
 	}
 
-	override protected prepareInitializeModel(IExecutionContext executionContext) {
+	override protected prepareInitializeModel(SequentialModelExecutionContext executionContext) {
 		// Nothing to do
 	}
 
-	public def disableFeedback() {
+	def disableFeedback() {
 		this.feedback = false
 	}
 

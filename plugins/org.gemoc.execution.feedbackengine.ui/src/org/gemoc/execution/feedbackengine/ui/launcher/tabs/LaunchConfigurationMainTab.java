@@ -29,8 +29,10 @@ import org.eclipse.gemoc.commons.eclipse.emf.URIHelper;
 import org.eclipse.gemoc.commons.eclipse.ui.dialogs.SelectAnyIFileDialog;
 import org.eclipse.gemoc.dsl.debug.ide.launch.AbstractDSLLaunchConfigurationDelegate;
 import org.eclipse.gemoc.dsl.debug.ide.sirius.ui.launch.AbstractDSLLaunchConfigurationDelegateSiriusUI;
+import org.eclipse.gemoc.execution.sequential.javaengine.K3RunConfiguration;
+import org.eclipse.gemoc.executionframework.engine.commons.DslHelper;
 import org.eclipse.gemoc.executionframework.engine.commons.MelangeHelper;
-import org.eclipse.gemoc.executionframework.engine.ui.commons.RunConfiguration;
+import org.eclipse.gemoc.executionframework.engine.core.RunConfiguration;
 import org.eclipse.gemoc.xdsmlframework.ui.utils.dialogs.SelectAIRDIFileDialog;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.osgi.util.NLS;
@@ -103,10 +105,10 @@ public class LaunchConfigurationMainTab extends LaunchConfigurationTab {
 
 	@Override
 	public void setDefaults(ILaunchConfigurationWorkingCopy configuration) {
-		configuration.setAttribute(RunConfiguration.LAUNCH_DELAY, 1000);
-		configuration.setAttribute(RunConfiguration.LAUNCH_MODEL_ENTRY_POINT, "");
-		configuration.setAttribute(RunConfiguration.LAUNCH_METHOD_ENTRY_POINT, "");
-		configuration.setAttribute(RunConfiguration.LAUNCH_SELECTED_LANGUAGE, "");
+		configuration.setAttribute(K3RunConfiguration.LAUNCH_DELAY, 1000);
+		configuration.setAttribute(K3RunConfiguration.LAUNCH_MODEL_ENTRY_POINT, "");
+		configuration.setAttribute(K3RunConfiguration.LAUNCH_METHOD_ENTRY_POINT, "");
+		configuration.setAttribute(K3RunConfiguration.LAUNCH_SELECTED_LANGUAGE, "");
 	}
 
 	@Override
@@ -269,7 +271,7 @@ public class LaunchConfigurationMainTab extends LaunchConfigurationTab {
 		_languageCombo = new Combo(parent, SWT.NONE);
 		_languageCombo.setLayoutData(createStandardLayout());
 
-		List<String> languagesNames = MelangeHelper.getAllLanguages();
+		List<String> languagesNames = DslHelper.getAllLanguages();
 		String[] empty = {};
 		_languageCombo.setItems(languagesNames.toArray(empty));
 		_languageCombo.addSelectionListener(new SelectionAdapter() {

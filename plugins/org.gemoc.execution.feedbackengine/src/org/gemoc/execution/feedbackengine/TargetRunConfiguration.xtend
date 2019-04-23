@@ -4,9 +4,10 @@ import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.emf.ecore.resource.ResourceSet
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
-import org.eclipse.gemoc.xdsmlframework.api.core.IRunConfiguration
+import org.eclipse.gemoc.execution.sequential.javaengine.IK3RunConfiguration
 
-class TargetRunConfiguration implements IRunConfiguration {
+// TODO specific to K3?
+class TargetRunConfiguration implements IK3RunConfiguration {
 
 	val URI staticModelURI
 	val String melangeQuery
@@ -29,9 +30,9 @@ class TargetRunConfiguration implements IRunConfiguration {
 	override getAnimatorURI() {
 		null;
 	}
-
-	override getDeadlockDetectionDepth() {
-		0;
+	
+	override getExecutionEntryPoint() {
+		return entryPoint;
 	}
 
 	override getEngineAddonExtensions() {
@@ -44,10 +45,6 @@ class TargetRunConfiguration implements IRunConfiguration {
 
 	override getExecutedModelURI() {
 		staticModelURI
-	}
-
-	override getExecutionEntryPoint() {
-		entryPoint
 	}
 
 	override getLanguageName() {
