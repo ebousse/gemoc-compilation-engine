@@ -15,11 +15,13 @@ import org.eclipse.emf.ecore.resource.ResourceSet
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
 import org.eclipse.emf.edit.command.AddCommand
 import org.eclipse.emf.transaction.util.TransactionUtil
+import org.eclipse.gemoc.dsl.Dsl
 import org.eclipse.gemoc.execution.sequential.javaengine.SequentialModelExecutionContext
 import org.eclipse.gemoc.executionframework.engine.core.AbstractExecutionEngine
 import org.eclipse.gemoc.executionframework.engine.core.AbstractSequentialExecutionEngine
 import org.eclipse.gemoc.xdsmlframework.api.core.IExecutionContext
 import org.eclipse.gemoc.xdsmlframework.api.core.IRunConfiguration
+import org.eclipse.xtend.lib.annotations.Data
 
 class FeedbackEngine extends AbstractSequentialExecutionEngine<SequentialModelExecutionContext<IRunConfiguration>, IRunConfiguration> {
 
@@ -43,13 +45,10 @@ class FeedbackEngine extends AbstractSequentialExecutionEngine<SequentialModelEx
 
 	override protected prepareEntryPoint(SequentialModelExecutionContext<IRunConfiguration> executionContext) {
 
-		// Reading melange model to find compiler and feedback identifiers
-//		val Dsl language = getMelangeLanguage(executionContext)
-//		val String compilerID = language.entries.findFirst[key.equals(annotationCompilerKey)].value
-//		val String feedbackID = language.entries.findFirst[key.equals(annotationFeedbackKey)].value
-		val Language language = getMelangeLanguage(executionContext)
-		val String compilerID = language.annotations.findFirst[key.equals(annotationCompilerKey)].value
-		val String feedbackID = language.annotations.findFirst[key.equals(annotationFeedbackKey)].value
+		// Reading language to find compiler and feedback identifiers
+		val Annotations annotations = getAnnotations(executionContext)
+		val String compilerID = annotations.compilerID
+		val String feedbackID = annotations.feedbackID
 
 		// Compiling
 		val Compiler compiler = getExtension(compilerExtensionPoint, compilerID) as Compiler
@@ -137,19 +136,35 @@ class FeedbackEngine extends AbstractSequentialExecutionEngine<SequentialModelEx
 		"FeedbackEngine"
 	}
 
-	private static def Language getMelangeLanguage(IExecutionContext executionContext) {
-		val String melangeModelPath = executionContext.getLanguageDefinitionExtension().getXDSMLFilePath();
+	@Data
+	static class Annotations {
+		String compilerID
+		String feedbackID
+	}
+
+	private static def Annotations getAnnotations(IExecutionContext executionContext) {
+		val String filePath = executionContext.getLanguageDefinitionExtension().getXDSMLFilePath();
 		val ResourceSet rs = new ResourceSetImpl
-		val Resource xdsmlFileResource = rs.getResource(URI::createPlatformPluginURI(melangeModelPath, true), true);
-		val ModelTypingSpace modelTypingSpace = xdsmlFileResource.getContents().get(0) as ModelTypingSpace;
-		val String languageFQN = executionContext.getLanguageDefinitionExtension().getName();
-		for (Element element : modelTypingSpace.getElements()) {
-			if (element instanceof Language) {
-				val Language language = element as Language;
-				if (languageFQN.endsWith("." + language.getName())) {
-					return language;
+		if (filePath.endsWith("melange")) {
+			val Resource xdsmlFileResource = rs.getResource(URI::createPlatformPluginURI(filePath, true), true);
+			val ModelTypingSpace modelTypingSpace = xdsmlFileResource.getContents().get(0) as ModelTypingSpace;
+			val String languageFQN = executionContext.getLanguageDefinitionExtension().getName();
+			for (Element element : modelTypingSpace.getElements()) {
+				if (element instanceof Language) {
+					val Language language = element as Language;
+					if (languageFQN.endsWith("." + language.getName())) {
+						val String compilerID = language.annotations.findFirst[key.equals(annotationCompilerKey)].value
+						val String feedbackID = language.annotations.findFirst[key.equals(annotationFeedbackKey)].value
+						return new Annotations(compilerID, feedbackID);
+					}
 				}
 			}
+		} else if (filePath.endsWith("dsl")) {
+			val Resource xdsmlFileResource = rs.getResource(URI::createURI(filePath, true), true);
+			val Dsl dsl = xdsmlFileResource.getContents().get(0) as Dsl;
+			val String compilerID = dsl.entries.findFirst[key.equals(annotationCompilerKey)].value
+			val String feedbackID = dsl.entries.findFirst[key.equals(annotationFeedbackKey)].value
+			return new Annotations(compilerID, feedbackID);
 		}
 
 	}
